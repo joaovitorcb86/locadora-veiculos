@@ -48,7 +48,8 @@ def diarias_de_atraso(devolucao_prevista, devolucao_real, tolerancia_min=TOLERAN
 
 
 def valor_multa(diarias_atraso, valor_diaria):
-    raise NotImplementedError
+    total = diarias_atraso * valor_diaria * FATOR_MULTA_ATRASO
+    return total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
 
 def taxa_combustivel(quartos_saida, quartos_retorno, valor_tanque_cheio):

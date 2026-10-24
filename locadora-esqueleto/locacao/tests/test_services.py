@@ -5,10 +5,12 @@ exata de 60 min, arredondamento HALF_UP, combustível sem crédito.
 Rodar: python manage.py test locacao.tests.test_services
 """
 from datetime import datetime
+from decimal import Decimal
 
 from django.test import SimpleTestCase
 
-from locacao import services  # noqa: F401
+from locacao import services
+
 
 class DiariasContratadasTests(SimpleTestCase):
     def test_tres_dias_exatos(self):
@@ -26,9 +28,6 @@ class DiariasContratadasTests(SimpleTestCase):
         prevista = datetime(2026, 10, 10, 11, 0)
         self.assertEqual(services.diarias_contratadas(retirada, prevista), 1)
 
-class FormulasTests(SimpleTestCase):
-    def test_exemplo_numerico_690(self):
-        self.skipTest("TODO P4")
 
 class ValorPrevistoTests(SimpleTestCase):
     def test_tres_diarias_de_120(self):
@@ -39,10 +38,6 @@ class ValorPrevistoTests(SimpleTestCase):
         resultado = services.valor_previsto(1, Decimal("99.90"))
         self.assertEqual(resultado, Decimal("99.90"))
 
-from datetime import datetime
-from decimal import Decimal
-
-from django.test import SimpleTestCase
 
 class DiariasDeAtrasoTests(SimpleTestCase):
     def setUp(self):
@@ -75,3 +70,25 @@ class DiariasDeAtrasoTests(SimpleTestCase):
     def test_um_minuto_depois_vira_duas_diarias(self):
         real = datetime(2026, 10, 14, 10, 1)
         self.assertEqual(services.diarias_de_atraso(self.prevista, real), 2)
+
+class ValorMultaTests(SimpleTestCase):
+    def test_exemplo_do_projeto(self):
+        resultado = services.valor_multa(1, Decimal("120.00"))
+        self.assertEqual(resultado, Decimal("180.00"))
+
+    def test_duas_diarias_de_atraso(self):
+        resultado = services.valor_multa(2, Decimal("120.00"))
+        self.assertEqual(resultado, Decimal("360.00"))
+
+    def test_sem_atraso_nao_tem_multa(self):
+        resultado = services.valor_multa(0, Decimal("120.00"))
+        self.assertEqual(resultado, Decimal("0.00"))
+
+    def test_arredonda_para_cima_na_metade(self):
+        # 99,99 x 1,5 = 149,985 -> arredonda para 149,99
+        resultado = services.valor_multa(1, Decimal("99.99"))
+        self.assertEqual(resultado, Decimal("149.99"))
+
+class FormulasTests(SimpleTestCase):
+    def test_exemplo_numerico_690(self):
+        self.skipTest("TODO P4")
