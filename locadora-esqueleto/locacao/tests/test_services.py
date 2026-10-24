@@ -89,6 +89,28 @@ class ValorMultaTests(SimpleTestCase):
         resultado = services.valor_multa(1, Decimal("99.99"))
         self.assertEqual(resultado, Decimal("149.99"))
 
+class TaxaCombustivelTests(SimpleTestCase):
+    def test_exemplo_do_projeto(self):
+        resultado = services.taxa_combustivel(4, 2, Decimal("300.00"))
+        self.assertEqual(resultado, Decimal("150.00"))
+
+    def test_voltou_igual_nao_cobra(self):
+        resultado = services.taxa_combustivel(4, 4, Decimal("300.00"))
+        self.assertEqual(resultado, Decimal("0.00"))
+
+    def test_voltou_com_mais_nao_tem_credito(self):
+        resultado = services.taxa_combustivel(2, 4, Decimal("300.00"))
+        self.assertEqual(resultado, Decimal("0.00"))
+
+    def test_um_quarto_a_menos(self):
+        resultado = services.taxa_combustivel(4, 3, Decimal("300.00"))
+        self.assertEqual(resultado, Decimal("75.00"))
+
+    def test_arredonda_para_cima_na_metade(self):
+        # 100,10 / 4 = 25,025 -> arredonda para 25,03
+        resultado = services.taxa_combustivel(4, 3, Decimal("100.10"))
+        self.assertEqual(resultado, Decimal("25.03"))
+
 class FormulasTests(SimpleTestCase):
     def test_exemplo_numerico_690(self):
         self.skipTest("TODO P4")

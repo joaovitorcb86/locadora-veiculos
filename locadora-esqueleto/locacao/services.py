@@ -53,7 +53,9 @@ def valor_multa(diarias_atraso, valor_diaria):
 
 
 def taxa_combustivel(quartos_saida, quartos_retorno, valor_tanque_cheio):
-    raise NotImplementedError
+    faltaram = max(0, quartos_saida - quartos_retorno)
+    total = Decimal(faltaram) * valor_tanque_cheio / 4
+    return total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
 
 def valor_total(previsto, multa, combustivel):
