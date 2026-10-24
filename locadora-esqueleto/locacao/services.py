@@ -22,11 +22,9 @@ Meta: o exemplo numérico da documentação dá exatamente R$ 690,00.
   retirada 10/10 09:00 (CHEIO) | prevista 13/10 09:00 | real 13/10 14:00 (METADE)
   3 diárias = 360 + multa 180 (1 diária extra x 120 x 1,5) + combustível 150 = 690
 """
-from decimal import ROUND_HALF_UP, Decimal  # noqa: F401
-
-from datetime import timedelta
-
 import math
+from datetime import timedelta
+from decimal import ROUND_HALF_UP, Decimal
 
 TOLERANCIA_ATRASO_MIN = 60
 FATOR_MULTA_ATRASO = Decimal("1.5")
@@ -38,9 +36,11 @@ def diarias_contratadas(retirada, devolucao_prevista):
     dias = math.ceil(horas / 24)
     return max(1, dias)
 
+
 def valor_previsto(diarias, valor_diaria):
     total = diarias * valor_diaria
     return total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
 
 def diarias_de_atraso(devolucao_prevista, devolucao_real, tolerancia_min=TOLERANCIA_ATRASO_MIN):
     minutos = (devolucao_real - devolucao_prevista).total_seconds() / 60
@@ -61,8 +61,12 @@ def taxa_combustivel(quartos_saida, quartos_retorno, valor_tanque_cheio):
 
 
 def valor_total(previsto, multa, combustivel):
-    raise NotImplementedError
+    total = previsto + multa + combustivel
+    return total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
 
 def multa_cancelamento(valor_estimado, retirada_prevista, agora):
-    raise NotImplementedError
+    if retirada_prevista - agora < timedelta(hours=24):
+        total = valor_estimado * PERCENTUAL_MULTA_CANCELAMENTO
+        return total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    return Decimal("0.00")
