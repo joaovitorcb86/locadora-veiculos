@@ -24,18 +24,21 @@ Meta: o exemplo numérico da documentação dá exatamente R$ 690,00.
 """
 from decimal import ROUND_HALF_UP, Decimal  # noqa: F401
 
+import math
+
 TOLERANCIA_ATRASO_MIN = 60
 FATOR_MULTA_ATRASO = Decimal("1.5")
 PERCENTUAL_MULTA_CANCELAMENTO = Decimal("0.20")
 
 
 def diarias_contratadas(retirada, devolucao_prevista):
-    raise NotImplementedError
-
+    horas = (devolucao_prevista - retirada).total_seconds() / 3600
+    dias = math.ceil(horas / 24)
+    return max(1, dias)
 
 def valor_previsto(diarias, valor_diaria):
-    raise NotImplementedError
-
+    total = diarias * valor_diaria
+    return total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
 def diarias_de_atraso(devolucao_prevista, devolucao_real, tolerancia_min=TOLERANCIA_ATRASO_MIN):
     raise NotImplementedError
