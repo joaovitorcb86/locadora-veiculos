@@ -111,6 +111,64 @@ class TaxaCombustivelTests(SimpleTestCase):
         resultado = services.taxa_combustivel(4, 3, Decimal("100.10"))
         self.assertEqual(resultado, Decimal("25.03"))
 
-class FormulasTests(SimpleTestCase):
+class ValorTotalTests(SimpleTestCase):
+    def test_soma_das_tres_partes(self):
+        resultado = services.valor_total(
+            Decimal("360.00"), Decimal("180.00"), Decimal("150.00")
+        )
+        self.assertEqual(resultado, Decimal("690.00"))
+
+    def test_sem_multa_e_sem_combustivel(self):
+        resultado = services.valor_total(
+            Decimal("360.00"), Decimal("0.00"), Decimal("0.00")
+        )
+        self.assertEqual(resultado, Decimal("360.00"))
+
+
+class MultaCancelamentoTests(SimpleTestCase):
+    def setUp(self):
+        self.retirada = datetime(2026, 10, 13, 9, 0)
+        self.valor = Decimal("360.00")
+
+    def test_menos_de_24h_cobra_20_por_cento(self):
+        agora = datetime(2026, 10, 12, 10, 0)  # faltam 23 h
+        resultado = services.multa_cancelamento(self.valor, self.retirada, agora)
+        self.assertEqual(resultado, Decimal("72.00"))
+
+    def test_exatamente_24h_nao_cobra(self):
+        agora = datetime(2026, 10, 12, 9, 0)  # faltam 24 h
+        resultado = services.multa_cancelamento(self.valor, self.retirada, agora)
+        self.assertEqual(resultado, Decimal("0.00"))
+
+    def test_mais_de_24h_nao_cobra(self):
+        agora = datetime(2026, 10, 10, 9, 0)  # faltam 72 h
+        resultado = services.multa_cancelamento(self.valor, self.retirada, agora)
+        self.assertEqual(resultado, Decimal("0.00"))
+
+    def test_um_minuto_antes_de_completar_24h_cobra(self):
+        agora = datetime(2026, 10, 12, 9, 1)  # faltam 23 h 59 min
+        resultado = services.multa_cancelamento(self.valor, self.retirada, agora)
+        self.assertEqual(resultado, Decimal("72.00"))
+
+
+class ExemploNumericoTests(SimpleTestCase):
     def test_exemplo_numerico_690(self):
-        self.skipTest("TODO P4")
+        diaria = Decimal("120.00")
+        tanque_cheio = Decimal("300.00")
+        retirada = datetime(2026, 10, 10, 9, 0)
+        prevista = datetime(2026, 10, 13, 9, 0)
+        real = datetime(2026, 10, 13, 14, 0)
+
+        diarias = services.diarias_contratadas(retirada, prevista)
+        previsto = services.valor_previsto(diarias, diaria)
+        atraso = services.diarias_de_atraso(prevista, real)
+        multa = services.valor_multa(atraso, diaria)
+        combustivel = services.taxa_combustivel(4, 2, tanque_cheio)
+        total = services.valor_total(previsto, multa, combustivel)
+
+        self.assertEqual(diarias, 3)
+        self.assertEqual(previsto, Decimal("360.00"))
+        self.assertEqual(atraso, 1)
+        self.assertEqual(multa, Decimal("180.00"))
+        self.assertEqual(combustivel, Decimal("150.00"))
+        self.assertEqual(total, Decimal("690.00"))

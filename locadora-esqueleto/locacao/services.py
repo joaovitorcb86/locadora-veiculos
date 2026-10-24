@@ -24,6 +24,8 @@ Meta: o exemplo numérico da documentação dá exatamente R$ 690,00.
 """
 from decimal import ROUND_HALF_UP, Decimal  # noqa: F401
 
+from datetime import timedelta
+
 import math
 
 TOLERANCIA_ATRASO_MIN = 60
