@@ -43,3 +43,35 @@ from datetime import datetime
 from decimal import Decimal
 
 from django.test import SimpleTestCase
+
+class DiariasDeAtrasoTests(SimpleTestCase):
+    def setUp(self):
+        self.prevista = datetime(2026, 10, 13, 9, 0)
+
+    def test_dentro_da_tolerancia(self):
+        real = datetime(2026, 10, 13, 9, 30)
+        self.assertEqual(services.diarias_de_atraso(self.prevista, real), 0)
+
+    def test_exatamente_60_minutos_nao_tem_atraso(self):
+        real = datetime(2026, 10, 13, 10, 0)
+        self.assertEqual(services.diarias_de_atraso(self.prevista, real), 0)
+
+    def test_um_minuto_alem_da_tolerancia(self):
+        real = datetime(2026, 10, 13, 10, 1)
+        self.assertEqual(services.diarias_de_atraso(self.prevista, real), 1)
+
+    def test_exemplo_do_projeto_5_horas(self):
+        real = datetime(2026, 10, 13, 14, 0)
+        self.assertEqual(services.diarias_de_atraso(self.prevista, real), 1)
+
+    def test_devolveu_antes_do_prazo(self):
+        real = datetime(2026, 10, 12, 9, 0)
+        self.assertEqual(services.diarias_de_atraso(self.prevista, real), 0)
+
+    def test_24h_mais_tolerancia_ainda_e_uma_diaria(self):
+        real = datetime(2026, 10, 14, 10, 0)
+        self.assertEqual(services.diarias_de_atraso(self.prevista, real), 1)
+
+    def test_um_minuto_depois_vira_duas_diarias(self):
+        real = datetime(2026, 10, 14, 10, 1)
+        self.assertEqual(services.diarias_de_atraso(self.prevista, real), 2)

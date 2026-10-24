@@ -41,7 +41,10 @@ def valor_previsto(diarias, valor_diaria):
     return total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
 def diarias_de_atraso(devolucao_prevista, devolucao_real, tolerancia_min=TOLERANCIA_ATRASO_MIN):
-    raise NotImplementedError
+    minutos = (devolucao_real - devolucao_prevista).total_seconds() / 60
+    minutos_alem_da_tolerancia = minutos - tolerancia_min
+    dias = math.ceil(minutos_alem_da_tolerancia / (24 * 60))
+    return max(0, dias)
 
 
 def valor_multa(diarias_atraso, valor_diaria):
